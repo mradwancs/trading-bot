@@ -1,0 +1,11 @@
+#ignore test script
+/scripts/test.py
+
+#ignore pycache
+scripts/__pycache__/
+
+#ignore logs
+logs/
+
+#ignore virtual environment
+env/
