@@ -8,11 +8,11 @@ import os
 os.makedirs('logs', exist_ok=True)
 logging.basicConfig(filename='logs/fetch_data_errors.log', level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def fetch_data(stock_symbol, retries=5, delay=3):
+def fetch_data(stock_symbol, start_date='2024-01-01', end_date='2025-01-01', interval='1d', retries=5, delay=3):
     for attempts in range(retries):
         try:
             # Fetch stock data
-            stock_data = yf.download(stock_symbol, period='1y', interval='1d')
+            stock_data = yf.download(stock_symbol, start_date, end_date, interval)
 
             # Check if data is empty
             if stock_data.empty:
