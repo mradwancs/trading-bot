@@ -9,3 +9,6 @@ logs/
 
 #ignore virtual environment
 env/
+
+#ignore environment variables
+.env
