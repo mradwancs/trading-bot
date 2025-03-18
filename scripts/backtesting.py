@@ -8,7 +8,7 @@ def main():
     stock_symbol = 'NVDA'
     start_date = '2024-03-15'
     end_date = '2025-03-14'
-    interval = '1d'  # '1d', '1wk', '1mo'
+    interval = '1d' # '1d', '1wk', '1mo'
     data = fetch_data(stock_symbol, start_date, end_date, interval)
 
     #ensure data is not empty
