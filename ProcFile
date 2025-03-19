@@ -1,1 +1,1 @@
-web: python scripts/trade_live.py
+worker: python trade_live.py

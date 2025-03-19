@@ -2,6 +2,7 @@ import time
 import logging
 import os
 import pandas as pd
+from fetch_data import fetch_data
 from dotenv import load_dotenv
 
 # Import the new Alpaca SDK
@@ -79,49 +80,22 @@ def place_sell_order(symbol, qty):
 # fetch data based on sma long value
 def fetch_live_data(symbol, short, long):
     from datetime import datetime, timedelta
-    
+    # calculate start date based on long sma value
     end_date = datetime.now()
-    # Request enough calendar days to ensure we get at least 'long' trading days
-    # A general rule: multiply by 1.5 to account for weekends and holidays
-    calendar_days = int(long * 1.5)
+    calendar_days = int(long * 1.5) # multiply by 1.5 to account for weekends and holidays
     start_date = end_date - timedelta(days=calendar_days)
     
-    request_params = StockBarsRequest(
-        symbol_or_symbols=symbol,
-        timeframe=TimeFrame.Day,
-        start=start_date,
-        end=end_date
-    )
-    
-    try:
-        bars_response = data_client.get_stock_bars(request_params)
-        bars_df = bars_response.df
-        
-        # Handle multi-index if present
-        if isinstance(bars_df.index, pd.MultiIndex):
-            bars_df = bars_df.reset_index(level=0, drop=True)
-        
-        # Sort by date to ensure chronological order
-        bars_df = bars_df.sort_index()
-        
-        # Take only the last 'long' trading days (or all if less than 'long')
-        if len(bars_df) > long:
-            bars_df = bars_df.iloc[-long:]
-        elif len(bars_df) < long:
-            logging.warning(f"Only {len(bars_df)} days of data available, less than requested {long} days")
-        
-        # Make sure we have the required columns
-        data = bars_df[['open', 'high', 'low', 'close', 'volume']].copy()
-        
-        # Calculate SMA
-        data[f'SMA{short}'] = data['close'].rolling(window=short).mean()
-        data[f'SMA{long}'] = data['close'].rolling(window=long).mean()
-        
-        return data
-        
-    except Exception as e:
-        logging.error(f"Error fetching data: {e}\ndate: {time.strftime('%Y-%m-%d %H:%M:%S')}")
-        raise e
+    data = fetch_data(symbol, start_date, end_date, '1d')
+
+    if data is None:
+        return pd.DataFrame()
+
+    # calculate short and long SMAs
+    data[f'SMA{short}'] = data['Close'].rolling(window=short).mean()
+    data[f'SMA{long}'] = data['Close'].rolling(window=long).mean()
+
+    return data
+
 
 
 # main trading logic
@@ -157,6 +131,7 @@ def trade(symbol, short, long):
 
 def main():
     while True:
+        print('Attempting to trade...')
         trade(symbol, SMA_SHORT, SMA_LONG)
         time.sleep(60 * 60 * 24) # sleep for 12 hours
     
