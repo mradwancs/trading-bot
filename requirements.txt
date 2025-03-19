@@ -2,3 +2,4 @@ matplotlib
 pandas
 yfinance
 alpaca_py
+python-dotenv
